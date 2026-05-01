@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+  
 # vacina-facil
 =======
 
@@ -162,4 +162,4 @@ Sinta-se livre para contribuir ou sugerir melhorias.
 
 Este projecto é para fins académicos e de aprendizagem.
 
->>>>>>> 0834580 (Initial commit - VacinaFacil fullstack)
+
