@@ -1,12 +1,35 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { post } from "../services/api";
+import { get, patch } from "../../services/api";
 import Link from "next/link";
 
-const STATUS_COLORS = {
-  PENDENTE:  "bg-yellow-500/10 text-yellow-400 border-yellow-500/30",
-  REALIZADO: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
-  CANCELADO: "bg-red-500/10 text-red-400 border-red-500/30",
+function getInitials(nome = "") {
+  return nome.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase();
+}
+
+const STATUS_BADGE = {
+  PENDENTE:  { label: "Pendente",  cls: "badge-pendente"  },
+  REALIZADO: { label: "Realizado", cls: "badge-realizado" },
+  CANCELADO: { label: "Cancelado", cls: "badge-cancelado" },
+};
+
+const VaccineIcon = ({ status }) => {
+  if (status === "REALIZADO") return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M3 8L6.5 11.5L13 4.5" stroke="#10B981" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+  if (status === "PENDENTE") return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <circle cx="8" cy="8" r="5.5" stroke="#FBBF24" strokeWidth="1.5"/>
+      <path d="M8 5.5V8.5L10 10" stroke="#FBBF24" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  );
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M5 5L11 11M11 5L5 11" stroke="#F87171" strokeWidth="1.8" strokeLinecap="round"/>
+    </svg>
+  );
 };
 
 export default function Historico() {
@@ -19,10 +42,7 @@ export default function Historico() {
 
   useEffect(() => {
     if (!codigo) return;
-    Promise.all([
-      get(`/utentes/${codigo}`),
-      get(`/agendamentos/historico/${codigo}`),
-    ])
+    Promise.all([get(`/utentes/${codigo}`), get(`/agendamentos/historico/${codigo}`)])
       .then(([u, h]) => { setUtente(u); setHistorico(h); })
       .catch((err) => setErro(err.message))
       .finally(() => setLoading(false));
@@ -37,105 +57,131 @@ export default function Historico() {
     }
   }
 
+  const total = historico.length;
+  const realizados = historico.filter((a) => a.status === "REALIZADO").length;
+  const pendentes = historico.filter((a) => a.status === "PENDENTE").length;
+
   if (loading) return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-      <p className="text-gray-400 animate-pulse">A carregar...</p>
+    <div style={{ minHeight:"100vh", background:"#060A0F", display:"flex", alignItems:"center", justifyContent:"center", fontFamily:"'DM Sans',sans-serif" }}>
+      <style>{`@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}`}</style>
+      <p style={{ color:"#4B5563", fontSize:14, animation:"pulse 1.5s infinite" }}>A carregar...</p>
     </div>
   );
 
   if (erro) return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
-      <div className="text-center">
-        <p className="text-red-400 mb-4">{erro}</p>
-        <Link href="/" className="text-emerald-400 hover:underline">← Voltar</Link>
+    <div style={{ minHeight:"100vh", background:"#060A0F", display:"flex", alignItems:"center", justifyContent:"center", padding:"1rem", fontFamily:"'DM Sans',sans-serif" }}>
+      <div style={{ textAlign:"center" }}>
+        <p style={{ color:"#F87171", marginBottom:16, fontSize:14 }}>{erro}</p>
+        <Link href="/" style={{ color:"#10B981", fontSize:13, textDecoration:"none" }}>← Voltar</Link>
       </div>
     </div>
   );
 
   return (
-    <main className="min-h-screen bg-gray-950 p-4 md:p-8">
-      <div className="max-w-2xl mx-auto">
+    <>
+      <style>{`
+        @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+        .vf-back:hover{color:#E5E7EB !important;}
+        .vf-item{transition:border-color .2s;}
+        .vf-item:hover{border-color:#2D3A47 !important;}
+        .vf-btn-ag:hover{background:#059669 !important;transform:translateY(-1px);}
+        .vf-marcar:hover{color:#10B981 !important;}
+        .badge-pendente{color:#FBBF24;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);}
+        .badge-realizado{color:#10B981;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);}
+        .badge-cancelado{color:#F87171;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);}
+      `}</style>
 
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <Link href="/" className="text-gray-500 hover:text-white text-sm transition-colors">
-            ← Início
-          </Link>
-          <h1 className="text-white font-bold text-lg">
-            Vacina<span className="text-emerald-400">Fácil</span>
-          </h1>
-        </div>
+      <main style={{ minHeight:"100vh", background:"#060A0F", padding:"2rem 1rem", fontFamily:"'DM Sans',sans-serif", position:"relative", overflow:"hidden" }}>
+        <div style={{ position:"absolute", width:600, height:600, borderRadius:"50%", background:"radial-gradient(ellipse,rgba(16,185,129,0.06) 0%,transparent 70%)", top:-100, left:"50%", transform:"translateX(-50%)", pointerEvents:"none" }} />
 
-        {/* Utente card */}
-        {utente && (
-          <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 mb-6">
-            <p className="text-gray-400 text-xs uppercase tracking-wider mb-1">Utente</p>
-            <h2 className="text-white text-xl font-semibold">{utente.nome}</h2>
-            <div className="flex items-center gap-3 mt-3">
-              <span className="font-mono text-emerald-400 bg-emerald-500/10
-                               border border-emerald-500/30 px-3 py-1 rounded-lg text-sm">
-                {utente.codigoUtente}
-              </span>
-              {utente.telefone && (
-                <span className="text-gray-500 text-sm">📱 {utente.telefone}</span>
-              )}
+        <div style={{ maxWidth:560, margin:"0 auto", position:"relative", zIndex:1 }}>
+
+          {/* Topbar */}
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:"2rem" }}>
+            <Link href="/" className="vf-back" style={{ fontSize:13, color:"#4B5563", textDecoration:"none", display:"flex", alignItems:"center", gap:6, transition:"color .2s" }}>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10 2L4 7L10 12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              Início
+            </Link>
+            <span style={{ fontSize:17, fontWeight:600, color:"#F0FDF4" }}>Vacina<span style={{ color:"#10B981" }}>Fácil</span></span>
+          </div>
+
+          {/* Utente card */}
+          {utente && (
+            <div style={{ background:"#0D1117", border:"1px solid #1C2631", borderRadius:16, padding:"1.4rem 1.5rem", marginBottom:"1.5rem", display:"flex", alignItems:"center", gap:"1rem" }}>
+              <div style={{ width:46, height:46, borderRadius:12, background:"rgba(16,185,129,0.12)", border:"1px solid rgba(16,185,129,0.2)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:17, fontWeight:600, color:"#10B981", flexShrink:0 }}>
+                {getInitials(utente.nome)}
+              </div>
+              <div style={{ flex:1 }}>
+                <p style={{ fontSize:11, fontWeight:500, letterSpacing:"0.08em", textTransform:"uppercase", color:"#4B5563", margin:"0 0 3px" }}>Utente</p>
+                <p style={{ fontSize:17, fontWeight:600, color:"#F0FDF4", margin:"0 0 6px" }}>{utente.nome}</p>
+                <div style={{ display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
+                  <span style={{ fontFamily:"'Space Mono',monospace", fontSize:12, color:"#10B981", background:"rgba(16,185,129,0.1)", border:"1px solid rgba(16,185,129,0.2)", borderRadius:8, padding:"3px 10px", letterSpacing:"0.08em" }}>{utente.codigoUtente}</span>
+                  {utente.telefone && <span style={{ fontSize:12, color:"#4B5563" }}>📱 {utente.telefone}</span>}
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Agendar button */}
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-white font-semibold">Histórico vacinal</h3>
-          <Link
-            href={`/agendar/${codigo}`}
-            className="bg-emerald-500 hover:bg-emerald-400 text-white text-sm
-                       font-medium px-4 py-2 rounded-xl transition-all"
-          >
-            + Agendar vacina
-          </Link>
-        </div>
-
-        {/* Lista */}
-        {historico.length === 0 ? (
-          <div className="bg-gray-900 rounded-2xl p-10 border border-gray-800 text-center">
-            <p className="text-gray-500">Nenhum agendamento ainda.</p>
-            <p className="text-gray-600 text-sm mt-1">
-              Clica em "Agendar vacina" para começar.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {historico.map((a) => (
-              <div
-                key={a.id}
-                className="bg-gray-900 rounded-2xl p-5 border border-gray-800
-                           flex items-center justify-between gap-4"
-              >
-                <div>
-                  <p className="text-white font-medium">{a.nomeVacina}</p>
-                  <p className="text-gray-500 text-sm mt-1">
-                    📅 {new Date(a.dataAgendada + "T00:00:00").toLocaleDateString("pt-PT")}
-                    &nbsp;·&nbsp; Dose {a.numeroDose}
-                  </p>
-                </div>
-                <div className="flex flex-col items-end gap-2">
-                  <span className={`text-xs px-3 py-1 rounded-full border font-medium ${STATUS_COLORS[a.status]}`}>
-                    {a.status}
-                  </span>
-                  {a.status === "PENDENTE" && (
-                    <button
-                      onClick={() => marcarRealizado(a.id)}
-                      className="text-xs text-gray-500 hover:text-emerald-400 transition-colors"
-                    >
-                      Marcar como realizado
-                    </button>
-                  )}
-                </div>
+          {/* Stats */}
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:10, marginBottom:"1.5rem" }}>
+            {[{ n:total, label:"Total", color:"#F0FDF4" }, { n:realizados, label:"Realizadas", color:"#10B981" }, { n:pendentes, label:"Pendentes", color:"#FBBF24" }].map(({ n, label, color }) => (
+              <div key={label} style={{ background:"#0D1117", border:"1px solid #1C2631", borderRadius:12, padding:"14px 12px", textAlign:"center" }}>
+                <div style={{ fontSize:22, fontWeight:600, color }}>{n}</div>
+                <div style={{ fontSize:11, color:"#4B5563", marginTop:2 }}>{label}</div>
               </div>
             ))}
           </div>
-        )}
-      </div>
-    </main>
+
+          {/* Section header */}
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:"1rem" }}>
+            <span style={{ fontSize:14, fontWeight:500, color:"#9CA3AF", letterSpacing:"0.03em" }}>Histórico vacinal</span>
+            <Link href={`/agendar/${codigo}`} className="vf-btn-ag" style={{ background:"#10B981", color:"#052e16", borderRadius:10, padding:"9px 16px", fontSize:13, fontWeight:600, fontFamily:"'DM Sans',sans-serif", display:"flex", alignItems:"center", gap:6, transition:"all .15s", textDecoration:"none" }}>
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1V12M1 6.5H12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
+              Agendar vacina
+            </Link>
+          </div>
+
+          {/* Lista */}
+          {historico.length === 0 ? (
+            <div style={{ background:"#0D1117", border:"1px solid #1C2631", borderRadius:16, padding:"3rem", textAlign:"center" }}>
+              <p style={{ fontSize:14, color:"#4B5563", margin:"0 0 4px" }}>Nenhum agendamento ainda.</p>
+              <small style={{ fontSize:12, color:"#2D3A47" }}>Clica em "Agendar vacina" para começar.</small>
+            </div>
+          ) : (
+            <div>
+              {historico.map((a) => {
+                const data = new Date(a.dataAgendada + "T00:00:00").toLocaleDateString("pt-PT", { day:"2-digit", month:"short", year:"numeric" });
+                const badge = STATUS_BADGE[a.status] || { label: a.status, cls: "" };
+                return (
+                  <div key={a.id} className="vf-item" style={{ background:"#0D1117", border:"1px solid #1C2631", borderRadius:14, padding:"1.1rem 1.25rem", display:"flex", alignItems:"center", justifyContent:"space-between", gap:"1rem", marginBottom:10 }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:14 }}>
+                      <div style={{ width:38, height:38, borderRadius:10, background:"#111827", border:"1px solid #1C2631", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                        <VaccineIcon status={a.status} />
+                      </div>
+                      <div>
+                        <p style={{ fontSize:14, fontWeight:500, color:"#E5E7EB", margin:"0 0 4px" }}>{a.nomeVacina}</p>
+                        <div style={{ fontSize:12, color:"#4B5563", display:"flex", alignItems:"center", gap:6 }}>
+                          {data}
+                          <span style={{ width:3, height:3, borderRadius:"50%", background:"#2D3A47", display:"inline-block" }} />
+                          Dose {a.numeroDose}
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-end", gap:6, flexShrink:0 }}>
+                      <span className={`badge ${badge.cls}`} style={{ fontSize:11, fontWeight:500, padding:"3px 10px", borderRadius:20, whiteSpace:"nowrap" }}>{badge.label}</span>
+                      {a.status === "PENDENTE" && (
+                        <button onClick={() => marcarRealizado(a.id)} className="vf-marcar" style={{ fontSize:11.5, color:"#2D3A47", background:"none", border:"none", fontFamily:"'DM Sans',sans-serif", cursor:"pointer", padding:0, transition:"color .2s" }}>
+                          Marcar como realizado
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </main>
+    </>
   );
 }
