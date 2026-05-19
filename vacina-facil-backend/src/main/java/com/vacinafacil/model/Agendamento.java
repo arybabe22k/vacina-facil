@@ -20,6 +20,10 @@ public class Agendamento {
     @JoinColumn(name = "vacina_id", nullable = false)
     private Vacina vacina;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "unidade_sanitaria_id")
+    private UnidadeSanitaria unidadeSanitaria;
+
     @Column(name = "data_agendada", nullable = false)
     private LocalDate dataAgendada;
 
@@ -36,35 +40,80 @@ public class Agendamento {
     public enum Status {
         PENDENTE,
         REALIZADO,
+        ATRASADO,
         CANCELADO
     }
 
     @PrePersist
     public void prePersist() {
         this.criadoEm = LocalDateTime.now();
-        if (this.status == null) this.status = Status.PENDENTE;
-        if (this.numeroDose == null) this.numeroDose = 1;
+
+        if (this.status == null) {
+            this.status = Status.PENDENTE;
+        }
+
+        if (this.numeroDose == null) {
+            this.numeroDose = 1;
+        }
     }
 
-    // Getters e Setters
+    public Long getId() {
+        return id;
+    }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Utente getUtente() {
+        return utente;
+    }
 
-    public Utente getUtente() { return utente; }
-    public void setUtente(Utente utente) { this.utente = utente; }
+    public Vacina getVacina() {
+        return vacina;
+    }
 
-    public Vacina getVacina() { return vacina; }
-    public void setVacina(Vacina vacina) { this.vacina = vacina; }
+    public UnidadeSanitaria getUnidadeSanitaria() {
+        return unidadeSanitaria;
+    }
 
-    public LocalDate getDataAgendada() { return dataAgendada; }
-    public void setDataAgendada(LocalDate dataAgendada) { this.dataAgendada = dataAgendada; }
+    public LocalDate getDataAgendada() {
+        return dataAgendada;
+    }
 
-    public Integer getNumeroDose() { return numeroDose; }
-    public void setNumeroDose(Integer numeroDose) { this.numeroDose = numeroDose; }
+    public Integer getNumeroDose() {
+        return numeroDose;
+    }
 
-    public Status getStatus() { return status; }
-    public void setStatus(Status status) { this.status = status; }
+    public Status getStatus() {
+        return status;
+    }
 
-    public LocalDateTime getCriadoEm() { return criadoEm; }
+    public LocalDateTime getCriadoEm() {
+        return criadoEm;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setUtente(Utente utente) {
+        this.utente = utente;
+    }
+
+    public void setVacina(Vacina vacina) {
+        this.vacina = vacina;
+    }
+
+    public void setUnidadeSanitaria(UnidadeSanitaria unidadeSanitaria) {
+        this.unidadeSanitaria = unidadeSanitaria;
+    }
+
+    public void setDataAgendada(LocalDate dataAgendada) {
+        this.dataAgendada = dataAgendada;
+    }
+
+    public void setNumeroDose(Integer numeroDose) {
+        this.numeroDose = numeroDose;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 }

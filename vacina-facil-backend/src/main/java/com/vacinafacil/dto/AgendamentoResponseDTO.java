@@ -10,6 +10,11 @@ public class AgendamentoResponseDTO {
     private String codigoUtente;
     private String nomeUtente;
     private String nomeVacina;
+
+    private String nomeUnidade;
+    private String distrito;
+    private String provincia;
+
     private LocalDate dataAgendada;
     private Integer numeroDose;
     private Status status;
@@ -26,6 +31,15 @@ public class AgendamentoResponseDTO {
 
     public String getNomeVacina() { return nomeVacina; }
     public void setNomeVacina(String nomeVacina) { this.nomeVacina = nomeVacina; }
+
+    public String getNomeUnidade() { return nomeUnidade; }
+    public void setNomeUnidade(String nomeUnidade) { this.nomeUnidade = nomeUnidade; }
+
+    public String getDistrito() { return distrito; }
+    public void setDistrito(String distrito) { this.distrito = distrito; }
+
+    public String getProvincia() { return provincia; }
+    public void setProvincia(String provincia) { this.provincia = provincia; }
 
     public LocalDate getDataAgendada() { return dataAgendada; }
     public void setDataAgendada(LocalDate dataAgendada) { this.dataAgendada = dataAgendada; }

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 import { post } from "../services/api";
+import Link from "next/link";
 
 export default function Home() {
   const router = useRouter();
@@ -32,19 +33,6 @@ export default function Home() {
 
   return (
     <>
-      <style>{`
-        .vf-input-code {
-          font-family: 'Space Mono', monospace !important;
-          font-size: 18px !important;
-          letter-spacing: 0.18em !important;
-          text-align: center !important;
-        }
-        .vf-input:focus { border-color: #10B981 !important; }
-        .vf-btn:hover:not(:disabled) { background: #059669 !important; transform: translateY(-1px); }
-        .vf-btn:active:not(:disabled) { transform: translateY(0); }
-        .vf-tab-active { background: #10B981 !important; color: #052e16 !important; }
-      `}</style>
-
       <main
         style={{
           minHeight: "100vh",
@@ -173,6 +161,7 @@ export default function Home() {
             O teu código é gerado automaticamente no registo
           </p>
         </div>
+
       </main>
     </>
   );

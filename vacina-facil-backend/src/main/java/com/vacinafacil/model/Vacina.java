@@ -26,7 +26,14 @@ public class Vacina {
     @OneToMany(mappedBy = "vacina", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Agendamento> agendamentos;
 
-    // Getters e Setters
+    public Vacina() {}
+
+    public Vacina(String nome, String descricao, Integer numeroDoses, Integer intervaloDias) {
+        this.nome = nome;
+        this.descricao = descricao;
+        this.numeroDoses = numeroDoses;
+        this.intervaloDias = intervaloDias;
+    }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }

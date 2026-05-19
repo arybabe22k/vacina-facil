@@ -1,0 +1,52 @@
+/* Fontes */
+.vf-input-code {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 18px !important;
+  letter-spacing: 0.18em !important;
+  text-align: center !important;
+}
+
+/* Inputs */
+.vf-input:focus { border-color: #10B981 !important; }
+.vf-select:focus { border-color: #10B981 !important; }
+
+/* Botões */
+.vf-btn:hover:not(:disabled) { background: #059669 !important; transform: translateY(-1px); }
+.vf-btn:active:not(:disabled) { transform: translateY(0); }
+.vf-btn-ag:hover { background: #059669 !important; transform: translateY(-1px); }
+
+/* Tabs */
+.vf-tab-active { background: #10B981 !important; color: #052e16 !important; }
+
+/* Links / navegação */
+.vf-back:hover { color: #E5E7EB !important; }
+
+/* Cards */
+.vf-item { transition: border-color .2s; }
+.vf-item:hover { border-color: #2D3A47 !important; }
+.vf-card { transition: border-color .2s; }
+.vf-card:hover { border-color: #2D3A47 !important; }
+.vf-vc { transition: all .15s; }
+.vf-vc:hover { border-color: #2D3A47 !important; }
+.vf-vc.sel { border-color: #10B981 !important; background: rgba(16,185,129,0.06) !important; }
+
+/* Badges de status */
+.badge-pendente  { color: #FBBF24; background: rgba(251,191,36,0.08);  border: 1px solid rgba(251,191,36,0.25); }
+.badge-realizado { color: #10B981; background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); }
+.badge-cancelado { color: #F87171; background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.2); }
+
+/* Dose buttons */
+.vf-dose-btn:hover { border-color: #10B981 !important; color: #10B981 !important; }
+
+/* Filtros do calendário */
+.vf-filter { transition: all .15s; }
+.vf-filter:hover { border-color: #2D3A47 !important; color: #9CA3AF !important; }
+
+/* Marcar realizado */
+.vf-marcar:hover { color: #10B981 !important; }
+
+/* Loading animation */
+@keyframes pulse { 0%, 100% { opacity: .4; } 50% { opacity: 1; } }
+.vf-pulse { animation: pulse 1.5s infinite; }
+
+.badge-atrasado { color: #F87171; background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.2); }

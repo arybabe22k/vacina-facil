@@ -27,6 +27,11 @@ public class AgendamentoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(agendamentoService.criar(dto));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<AgendamentoResponseDTO> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(agendamentoService.buscarPorId(id));
+    }
+
     @GetMapping("/historico/{codigoUtente}")
     public ResponseEntity<List<AgendamentoResponseDTO>> historico(@PathVariable String codigoUtente) {
         return ResponseEntity.ok(agendamentoService.historicoPorCodigo(codigoUtente));

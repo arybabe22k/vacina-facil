@@ -5,6 +5,7 @@ import com.vacinafacil.dto.UtenteResponseDTO;
 import com.vacinafacil.model.Utente;
 import com.vacinafacil.repository.UtenteRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Random;
@@ -14,11 +15,15 @@ import java.util.stream.Collectors;
 public class UtenteService {
 
     private final UtenteRepository utenteRepository;
+    private final AgendamentoService agendamentoService;
 
-    public UtenteService(UtenteRepository utenteRepository) {
+    public UtenteService(UtenteRepository utenteRepository,
+                         AgendamentoService agendamentoService) {
         this.utenteRepository = utenteRepository;
+        this.agendamentoService = agendamentoService;
     }
 
+    @Transactional
     public UtenteResponseDTO registar(UtenteRequestDTO dto) {
         if (dto.getBi() != null && utenteRepository.existsByBi(dto.getBi())) {
             throw new RuntimeException("Já existe um utente com esse BI.");
@@ -31,7 +36,12 @@ public class UtenteService {
         utente.setBi(dto.getBi());
         utente.setCodigoUtente(gerarCodigoUnico());
 
-        return toDTO(utenteRepository.save(utente));
+        Utente salvo = utenteRepository.save(utente);
+
+        // agendamentos automáticos baseados na data de nascimento
+        agendamentoService.criarAgendamentosAutomaticos(salvo);
+
+        return toDTO(salvo);
     }
 
     public UtenteResponseDTO buscarPorCodigo(String codigo) {
