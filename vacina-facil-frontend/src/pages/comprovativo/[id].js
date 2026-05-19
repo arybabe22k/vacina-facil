@@ -20,13 +20,8 @@ export default function Comprovativo() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) {
-    return <p style={{ padding: 30 }}>A carregar comprovativo...</p>;
-  }
-
-  if (erro) {
-    return <p style={{ padding: 30, color: "red" }}>{erro}</p>;
-  }
+  if (loading) return <p style={{ padding: 30 }}>A carregar comprovativo...</p>;
+  if (erro) return <p style={{ padding: 30, color: "red" }}>{erro}</p>;
 
   return (
     <>
@@ -49,16 +44,10 @@ export default function Comprovativo() {
             box-shadow: none !important;
             border-radius: 0 !important;
             width: 100% !important;
-            max-width: 100% !important;
           }
         }
 
         @media (max-width: 600px) {
-          .top-actions {
-            flex-direction: column !important;
-            align-items: stretch !important;
-          }
-
           .comprovativo {
             padding: 1.2rem !important;
           }
@@ -84,7 +73,7 @@ export default function Comprovativo() {
         }}
       >
         <div
-          className="no-print top-actions"
+          className="no-print"
           style={{
             maxWidth: 720,
             margin: "0 auto 1.5rem",
@@ -96,13 +85,9 @@ export default function Comprovativo() {
         >
           <Link
             href={`/historico/${agendamento.codigoUtente}`}
-            style={{
-              color: "#10B981",
-              textDecoration: "none",
-              fontSize: 14,
-            }}
+            style={{ color: "#10B981", textDecoration: "none", fontSize: 14 }}
           >
-            ← Voltar ao histórico
+            ← Voltar
           </Link>
 
           <button
@@ -137,7 +122,6 @@ export default function Comprovativo() {
             <h1 style={{ margin: 0, fontSize: 30 }}>
               Vacina<span style={{ color: "#10B981" }}>Fácil</span>
             </h1>
-
             <p style={{ margin: "8px 0 0", color: "#6B7280", fontSize: 14 }}>
               Comprovativo de Agendamento de Vacinação
             </p>
@@ -168,14 +152,7 @@ export default function Comprovativo() {
             <Linha label="Província" value={agendamento.provincia || "—"} />
           </Box>
 
-          <p
-            style={{
-              fontSize: 12,
-              color: "#6B7280",
-              textAlign: "center",
-              marginTop: "2rem",
-            }}
-          >
+          <p style={{ fontSize: 12, color: "#6B7280", textAlign: "center", marginTop: "2rem" }}>
             Este comprovativo foi gerado pelo sistema VacinaFácil.
           </p>
         </section>
