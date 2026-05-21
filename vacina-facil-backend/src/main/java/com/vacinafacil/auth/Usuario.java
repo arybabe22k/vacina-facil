@@ -1,0 +1,167 @@
+package com.vacinafacil.auth;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+@Entity
+@Table(name= "usuarios")
+@AllArgsConstructor
+@NoArgsConstructor    
+@Getter
+@Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class Usuario implements UserDetails {
+
+     
+    @Id     
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;  
+    
+    @Column(nullable = false, unique = true, length = 50)
+    private String username;
+           
+    @Column(nullable = false) 
+    private String password;
+    
+    @Column(nullable = false, unique = true, length = 100)
+    private String email;
+    
+    @Column(nullable = false, length = 50)
+    private String role;
+    
+    // Campos de segurança para recuperação de senha
+    @Column(name = "reset_token", length = 100)
+    private String resetToken;
+    
+    @Column(name = "reset_token_expiry")
+    private LocalDateTime resetTokenExpiry;
+    
+    @Column(name = "token_utilizado", columnDefinition = "BOOLEAN")
+    private Boolean tokenUtilizado = false;
+    // Campos de verificação de segurança
+    @Column(name = "pergunta_seguranca", length = 200)
+    private String perguntaSeguranca;
+    
+    @Column(name = "resposta_seguranca", length = 100)
+    private String respostaSeguranca;
+    
+    @Column(name = "telefone", length = 20)
+    private String telefone;
+    
+    @Column(name = "nuit", length = 14, unique = true)
+    private String nuit;
+    
+    @Column(name = "data_nascimento")
+    private LocalDate  dataNascimento;
+    
+    @Column(name = "ativo", nullable = false)
+    private Boolean ativo = true;
+      
+    @Column(name = "data_criacao")
+    private LocalDateTime dataCriacao = LocalDateTime.now();
+    
+    @Column(name = "ultimo_acesso")
+    private LocalDateTime ultimoAcesso; 
+        
+    @Column(name = "tentativas_login")
+    private Integer tentativasLogin = 0;
+    
+    @Column(name = "conta_bloqueada")
+    private Boolean contaBloqueada = false;
+         
+    // campos para a recuperacao via hash enviado por email
+    private String codigoVerificacao;
+    private LocalDateTime codigoVerificacaoExpiry;
+    private boolean codigoVerificado;
+       
+    //metodos pra controlar o primeiro login
+    @Column(name = "primeiro_login") 
+    private Boolean primeiroLogin = true;
+     
+    // Métodos de UserDetails
+   
+    @JsonIgnore
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+    	List<GrantedAuthority> authorities = new ArrayList<>();
+    	authorities.add(new SimpleGrantedAuthority(this.role));
+    	return authorities;
+    } 
+    
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;   
+    }
+    
+    @Override
+    public boolean isAccountNonLocked() {
+        return !contaBloqueada;   
+    }
+    
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+    
+    @Override
+    public boolean isEnabled() {
+        return ativo;
+    }
+       
+    // Métodos auxiliares para segurança
+    public void incrementarTentativasLogin() {
+        this.tentativasLogin++; 
+        if (this.tentativasLogin >= 5) {
+            this.contaBloqueada = true;
+        }
+    }  
+   
+    public void resetarTentativasLogin() {
+        this.tentativasLogin = 0;
+        this.contaBloqueada = false;
+    }
+    
+    public boolean isTokenValido() {
+        return resetToken != null && 
+               resetTokenExpiry != null && 
+               LocalDateTime.now().isBefore(resetTokenExpiry) &&
+               !tokenUtilizado;
+    }
+    
+    public void invalidarToken() {
+        this.tokenUtilizado = true;
+    } 
+    
+    public boolean isCodigoValido() {
+        return codigoVerificacao != null && 
+               codigoVerificacaoExpiry != null && 
+               codigoVerificacaoExpiry.isAfter(LocalDateTime.now()) && 
+               !codigoVerificado;
+    }
+
+}
+ 
+
+
+
+
+
