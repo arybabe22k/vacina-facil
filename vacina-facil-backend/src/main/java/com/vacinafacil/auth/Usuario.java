@@ -93,13 +93,12 @@ public class Usuario implements UserDetails {
     private String codigoVerificacao;
     private LocalDateTime codigoVerificacaoExpiry;
     private boolean codigoVerificado;
-       
+         
     //metodos pra controlar o primeiro login
     @Column(name = "primeiro_login") 
     private Boolean primeiroLogin = true;
      
-    // Métodos de UserDetails
-   
+    // Métodos de UserDetails 
     @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
     	List<GrantedAuthority> authorities = new ArrayList<>();
